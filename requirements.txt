@@ -1,0 +1,4 @@
+zenml
+tensorflow
+databricks-connect
+sentinelhub

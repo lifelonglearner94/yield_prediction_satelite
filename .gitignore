@@ -1,0 +1,72 @@
+# Bytecode und Cache-Dateien von Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+
+# Virtuelle Umgebungen
+venv/
+env/
+.venv/
+pip-wheel-metadata/
+pip-log.txt
+
+# IDE-spezifische Dateien (z. B. VSCode, PyCharm)
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Betriebssystemspezifische Dateien
+.DS_Store
+Thumbs.db
+
+# Log-Dateien
+logs/
+*.log
+nohup.out
+
+# Konfigurations- und Umgebungsvariablen
+.env
+.env.local
+*.secret
+
+# Daten- und Modell-Dateien
+data/raw/
+data/processed/
+data/*.csv
+data/*.json
+data/*.parquet
+data/germany_satellite_images/
+notebooks/*.ipynb_checkpoints/
+notebooks/
+
+# Docker & CI/CD
+docker/*.tar
+docker-compose.override.yml
+
+# Testing & Coverage
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+pytest_cache/
+junit.xml
+
+# Cache- und Temp-Dateien
+__pycache__/
+*.tmp
+*.cache
+*.egg-info/
+
+# Jupyter Notebook Checkpoints
+notebooks/.ipynb_checkpoints/
+
+# TensorFlow & ML-Modelle
+*.h5
+*.ckpt
+*.pb
+*.onnx
+model/
+models/
+checkpoints/

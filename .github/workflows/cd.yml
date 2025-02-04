@@ -1,0 +1,16 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main  # Deployment soll auf Änderungen im main-Branch reagieren
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Platzhalter für Deployment
+        run: echo "CD Pipeline wird in Zukunft hier definiert."
