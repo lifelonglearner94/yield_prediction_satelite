@@ -18,7 +18,8 @@ class SentinelHubImageDownloader:
                  output_folder=os.path.join("data", "germany_satelite_images"),
                  states_bbox=None,
                  years=None,
-                 states=None):
+                 states=None,
+                 num_images_per_year=10):
         """
         Initializes the downloader.
 
@@ -28,9 +29,10 @@ class SentinelHubImageDownloader:
             years (list): List of years for which images will be downloaded.
             states (list): Optional list of state names to process. If provided,
                            only these states will be downloaded.
+            num_images_per_year (int): Number of images per year to download.
         """
         load_dotenv()
-
+        self.num_images = num_images_per_year
         # Configure Sentinel Hub with credentials loaded from .env
         self.config = SHConfig()
         if not self.config.sh_client_id or not self.config.sh_client_secret:
@@ -39,7 +41,7 @@ class SentinelHubImageDownloader:
         # Default state bounding boxes if none provided
         default_states_bbox = {
             "Baden-Württemberg": (7.5113934084, 47.5338000528, 10.4918239143, 49.7913749328),
-            "Bayern": (9.8778443239, 50.2042330625, 12.6531964048, 51.6490678544),
+            "Bayern": (9.766846, 47.332047, 14.095459, 50.576029),
             "Brandenburg": (11.315918, 51.491543, 14.897461, 53.441526),
             "Hamburg": (9.593811, 53.390740, 10.405426, 53.742970),
             "Hessen": (7.591553, 49.439524, 10.404053, 51.719582),
@@ -78,19 +80,25 @@ class SentinelHubImageDownloader:
         else:
             self.image_paths = {}
 
-        # Evalscript for true color image (RGB)
+        # Updated evalscript for true color imagery with scaling.
+        # This scales Sentinel-2 L2A reflectance values (0-10000) to the 0-255 range.
         self.evalscript_true_color = """
-        //VERSION=3
-        function setup() {
-          return {
-            input: ["B02", "B03", "B04"],
-            output: { bands: 3 }
-          };
-        }
-        function evaluatePixel(sample) {
-          return [sample.B04, sample.B03, sample.B02];
-        }
-        """
+            //VERSION=3
+            function setup() {
+            return {
+                input: [{
+                bands: ["B02", "B03", "B04"],
+                units: "REFLECTANCE"   // request reflectance values in the 0-1 range
+                }],
+                output: { bands: 3, sampleType: "UINT8" }
+            };
+            }
+            function evaluatePixel(sample) {
+            // Now sample.B04, sample.B03, sample.B02 should be in 0-1.
+            return [sample.B04 * 255, sample.B03 * 255, sample.B02 * 255];
+            }
+            """
+
 
     def download_images(self):
         # Loop over the (possibly filtered) states
@@ -103,29 +111,42 @@ class SentinelHubImageDownloader:
                 self.image_paths[state] = {}
 
             bbox = BBox(bbox=bbox_coords, crs=CRS.WGS84)
-            resolution = 30  # desired resolution (in meters)
+            # Set an initial resolution (in meters)
+            resolution = 30
+            # Compute initial size using the provided resolution.
             size = bbox_to_dimensions(bbox, resolution=resolution)
+            width, height = size
+
+            # Check and adjust resolution if width or height exceed the 2500 px limit.
+            if width > 2500 or height > 2500:
+                scale_factor = max(width / 2500, height / 2500)
+                resolution = resolution * scale_factor
+                size = bbox_to_dimensions(bbox, resolution=resolution)
+                print(f"Adjusted resolution to {resolution} m for {state} to meet API limits. New dimensions: {size}")
 
             # Loop over each year
             for year in self.years:
                 year_str = str(year)
+                # Create a folder for the current year inside the state's folder.
+                year_folder = os.path.join(state_folder, year_str)
+                os.makedirs(year_folder, exist_ok=True)
+
                 if year_str not in self.image_paths[state]:
                     self.image_paths[state][year_str] = []
-                # Define the period: March 1 to July 31 of the given year
+                # Define the period: March 1 to July 1 of the given year
                 period_start = datetime(year, 3, 1)
-                period_end = datetime(year, 7, 31)
+                period_end = datetime(year, 7, 1)
                 total_days = (period_end - period_start).days
 
-                num_images = 25  # we want 25 pictures per year
-                # Generate 25 target dates evenly spaced within the period.
-                for i in range(num_images):
-                    fraction = i / (num_images - 1) if num_images > 1 else 0
+                # Generate target dates evenly spaced within the period.
+                for i in range(self.num_images):
+                    fraction = i / (self.num_images - 1) if self.num_images > 1 else 0
                     target_date = period_start + timedelta(days=fraction * total_days)
                     # Force the time to noon (12:00)
                     target_date = target_date.replace(hour=12, minute=0, second=0, microsecond=0)
                     date_str = target_date.strftime("%Y-%m-%d")
                     filename = f"{state}_{date_str}_true_color.png"
-                    filepath = os.path.join(state_folder, filename)
+                    filepath = os.path.join(year_folder, filename)
 
                     # Check if the file already exists on disk.
                     if os.path.exists(filepath):
@@ -134,9 +155,9 @@ class SentinelHubImageDownloader:
                         print(f"Image already exists for {state} on {date_str}. Skipping download.")
                         continue  # Skip download if the image exists
 
-                    # Define a narrow time window around noon (±30 minutes)
-                    time_from = (target_date - timedelta(minutes=30)).isoformat()
-                    time_to   = (target_date + timedelta(minutes=30)).isoformat()
+                    # Define a time window around noon (±7 days)
+                    time_from = (target_date - timedelta(days=7)).isoformat()
+                    time_to   = (target_date + timedelta(days=7)).isoformat()
                     time_interval = (time_from, time_to)
 
                     # Build the request using Sentinel-2 L2A data for true color imagery.
@@ -179,7 +200,7 @@ class SentinelHubImageDownloader:
         except Exception as e:
             print(f"Error saving image paths dictionary: {e}")
 
-# Example usage:
-# To process only "Bayern" and "Thüringen":
-# downloader = SentinelHubImageDownloader(states=["Bayern", "Thüringen"])
-# downloader.download_images()
+if __name__ == "__main__":
+    # TEST: Download images for Bayern and Thüringen for the years 2019 and 2020 with 2 images per year.
+    downloader = SentinelHubImageDownloader(states=["Bayern", "Thüringen"], years=[2019, 2020], num_images_per_year=2)
+    downloader.download_images()

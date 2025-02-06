@@ -32,6 +32,7 @@ nohup.out
 *.secret
 
 # Daten- und Modell-Dateien
+data/
 data/raw/
 data/processed/
 data/*.csv
@@ -70,3 +71,4 @@ notebooks/.ipynb_checkpoints/
 model/
 models/
 checkpoints/
+.zen/

@@ -5,8 +5,25 @@ def build_lists_of_image_paths_and_labels(image_paths_dict, preprocessed_yield_d
     list_of_all_image_paths_sorted = []
     list_of_all_yield_values_sorted = []
 
-    assert len(list_of_all_image_paths_sorted) == len(list_of_all_yield_values_sorted)
+    for state in image_paths_dict:
+        for year_str in image_paths_dict[state]:
+            image_paths = image_paths_dict[state][year_str]
+            year = int(year_str)
+
+            # Suche nach dem entsprechenden Ertragswert
+            yield_value = next((value for y, value in preprocessed_yield_dict[state] if y == year), None)
+
+            if yield_value is not None:
+                list_of_all_image_paths_sorted.extend(image_paths)
+                list_of_all_yield_values_sorted.extend([yield_value] * len(image_paths))
+            else:
+                print(f"Warnung: Kein Ertragswert für {state} im Jahr {year} gefunden.")
+
+    assert len(list_of_all_image_paths_sorted) == len(list_of_all_yield_values_sorted), \
+        "Die Listen der Bildpfade und Ertragswerte haben unterschiedliche Längen."
+
     return {"image_paths": list_of_all_image_paths_sorted, "labels": list_of_all_yield_values_sorted}
+
 
 
 def parse_image(image_path, label, img_size=(224, 224)):
