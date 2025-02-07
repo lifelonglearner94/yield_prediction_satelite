@@ -1,4 +1,4 @@
-```markdown
+
 # Yield Prediction from Satellite Images
 
 This project implements a machine learning pipeline that leverages satellite images (captured until July) to predict crop yield in tons per hectare. The model achieves a Mean Absolute Error (MAE) of about **10 t/ha**. The pipeline is built using [ZenML](https://zenml.io/) for orchestrating the workflow and [TensorFlow](https://www.tensorflow.org/) for model development.
