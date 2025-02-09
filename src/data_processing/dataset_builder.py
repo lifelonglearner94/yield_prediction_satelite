@@ -34,7 +34,7 @@ def parse_image_sequence(image_paths, label, img_size=(224, 224)):
 
     def load_and_preprocess(image_path):
         image = tf.io.read_file(image_path)
-        image = tf.image.decode_jpeg(image, channels=3)  # Falls PNG: tf.image.decode_png
+        image = tf.image.decode_png(image, channels=3)  # Falls PNG: tf.image.decode_png
         image = tf.image.resize(image, img_size)
         image = image / 255.0  # Normalisierung
         return image

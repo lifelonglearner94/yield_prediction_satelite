@@ -68,7 +68,6 @@ notebooks/.ipynb_checkpoints/
 *.ckpt
 *.pb
 *.onnx
-model/
 models/
 checkpoints/
 .zen/

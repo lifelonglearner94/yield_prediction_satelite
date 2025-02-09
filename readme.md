@@ -8,7 +8,6 @@ This project implements a machine learning pipeline that leverages satellite ima
 ## Table of Contents
 
 - [Overview](#overview)
-- [Project Structure](#project-structure)
 - [Requirements](#requirements)
 - [Setup Instructions](#setup-instructions)
 - [Pipeline Overview](#pipeline-overview)
@@ -29,23 +28,7 @@ This project demonstrates how to predict agricultural yield using satellite imag
 
 ---
 
-## Project Structure
 
-```
-├── data
-│   └── raw
-│       └── 41215-0010_de.csv      # CSV file containing yield data
-├── src
-│   ├── data_processing
-│   │   ├── dataset_builder.py     # Functions for building datasets and reading yield data
-│   │   ├── preprocess_data.py     # Functions for cleaning and preprocessing yield data
-│   │   └── sentinel_api.py        # Module to download satellite images from Sentinel Hub
-│   └── model
-│       └── tf_model.py            # Functions to create and compile the TensorFlow regression model
-└── pipeline.py                    # ZenML pipeline definition that ties the steps together
-```
-
----
 
 ## Requirements
 
