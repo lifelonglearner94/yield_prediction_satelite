@@ -46,7 +46,7 @@ def data_ingestion() -> dict:
 
 
 @step
-def train_model(data: dict, epochs=30, early_stopping_patience=8) -> dict:
+def train_model(data: dict, standardize=False, epochs=30, early_stopping_patience=8) -> dict:
     """
     Erzeugt und trainiert das TensorFlow-Modell für die Regression mit einem Validierungsset.
     Inkludiert Early Stopping, um das Training zu beenden, wenn sich der Validierungsfehler nicht mehr verbessert.
@@ -56,9 +56,19 @@ def train_model(data: dict, epochs=30, early_stopping_patience=8) -> dict:
         data["image_paths"], data["labels"], test_size=0.2, random_state=42
     )
 
-    # Baue separate TensorFlow-Datasets für Training und Validierung
-    train_dataset = build_dataset(train_image_paths, train_labels, batch_size=1)
-    val_dataset = build_dataset(val_image_paths, val_labels, batch_size=1)
+    if standardize:
+        train_labels_arr = np.array(train_labels)
+        global_mean = train_labels_arr.mean()
+        global_std = train_labels_arr.std()
+
+        train_labels_standardized = (train_labels_arr - global_mean) / global_std
+        val_labels_standardized = (np.array(val_labels) - global_mean) / global_std
+        train_dataset = build_dataset(train_image_paths, train_labels_standardized, batch_size=1)
+        val_dataset = build_dataset(val_image_paths, val_labels_standardized, batch_size=1)
+    else:
+        # Baue separate TensorFlow-Datasets für Training und Validierung
+        train_dataset = build_dataset(train_image_paths, train_labels, batch_size=1)
+        val_dataset = build_dataset(val_image_paths, val_labels, batch_size=1)
 
     # Erstelle das Modell
     model = create_regression_model_sequence(input_shape=(10, 224, 224, 3), use_augmentation=False)
@@ -117,5 +127,3 @@ def ertragsprognose_pipeline():
 
 if __name__ == "__main__":
     ertragsprognose_pipeline()
-
-    # TODO try with cloud free pictures

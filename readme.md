@@ -1,6 +1,6 @@
 # Yield Prediction from Satellite Images
 
-Welcome to the **Yield Prediction** project! This innovative pipeline leverages satellite imagery and state-of-the-art machine learning to predict crop yields in tons per hectare. Building on our success in achieving a Mean Absolute Error (MAE) of around **10 t/ha**, we've recently added some cool enhancements that improve both data quality and model performance.
+Welcome to the **Yield Prediction** project! This innovative pipeline leverages satellite imagery and state-of-the-art machine learning to predict crop yields in tons per hectare. Building on our success in achieving a Mean Absolute Error (MAE) of around **8.2 t/ha**, we've recently added some cool enhancements that improve both data quality and model performance.
 
 ---
 
