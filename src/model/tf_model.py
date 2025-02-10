@@ -58,8 +58,8 @@ def create_regression_model_sequence(input_shape=(10, 224, 224, 3), use_augmenta
     model = tf.keras.Model(inputs, outputs)
     return model
 
-def compile_model(model, learning_rate=0.001):
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate),
+def compile_model(model, learning_rate=0.005):
+    model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate),
                   loss='mse',
                   metrics=['mae'])
     return model

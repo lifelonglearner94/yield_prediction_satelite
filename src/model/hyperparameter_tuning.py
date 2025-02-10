@@ -29,9 +29,9 @@ class HyperparameterTuner:
     """
 
     def __init__(self,
-                 batch_sizes=[1, 2],
-                 learning_rates=[0.0001, 0.001, 0.01],
-                 optimizers=["adam", "sgd", "rmsprop"],
+                 batch_sizes=[1],
+                 learning_rates=[0.005, 0.01],
+                 optimizers=["sgd"],
                  epochs=90,
                  early_stopping_patience=8,
                  input_shape=(10, 224, 224, 3),
@@ -156,12 +156,19 @@ class HyperparameterTuner:
             }
             self.results.append(result)
 
+            # <-- NEW CODE: Print current top 10 hyperparameter combinations so far
+            results_so_far = pd.DataFrame(self.results)
+            results_so_far_sorted = results_so_far.sort_values(by="best_val_mae", ascending=True)
+            print("\nCurrent top 10 hyperparameter combinations so far:")
+            print(results_so_far_sorted.head(10))
+            # <-- END NEW CODE
+
         # Create a DataFrame with the results.
         results_df = pd.DataFrame(self.results)
         # Sort by best_val_mae in ascending order (lowest MAE first).
         results_df_sorted = results_df.sort_values(by="best_val_mae", ascending=True)
 
-        print("\nTop 10 hyperparameter combinations (sorted by best_val_mae):")
+        print("\nFinal Top 10 hyperparameter combinations (sorted by best_val_mae):")
         print(results_df_sorted.head(10))
         return results_df_sorted
 

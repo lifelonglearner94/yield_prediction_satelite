@@ -46,7 +46,7 @@ def data_ingestion() -> dict:
 
 
 @step
-def train_model(data: dict, epochs=20, early_stopping_patience=6) -> dict:
+def train_model(data: dict, epochs=30, early_stopping_patience=8) -> dict:
     """
     Erzeugt und trainiert das TensorFlow-Modell für die Regression mit einem Validierungsset.
     Inkludiert Early Stopping, um das Training zu beenden, wenn sich der Validierungsfehler nicht mehr verbessert.
@@ -57,12 +57,12 @@ def train_model(data: dict, epochs=20, early_stopping_patience=6) -> dict:
     )
 
     # Baue separate TensorFlow-Datasets für Training und Validierung
-    train_dataset = build_dataset(train_image_paths, train_labels, batch_size=2)
-    val_dataset = build_dataset(val_image_paths, val_labels, batch_size=2)
+    train_dataset = build_dataset(train_image_paths, train_labels, batch_size=1)
+    val_dataset = build_dataset(val_image_paths, val_labels, batch_size=1)
 
     # Erstelle das Modell
     model = create_regression_model_sequence(input_shape=(10, 224, 224, 3), use_augmentation=False)
-    model = compile_model(model, learning_rate=0.0001)
+    model = compile_model(model, learning_rate=0.005)
 
     # Erstelle EarlyStopping Callback
     early_stopping = tf.keras.callbacks.EarlyStopping(
